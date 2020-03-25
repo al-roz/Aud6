@@ -3,6 +3,14 @@
 #include <Windows.h>
 #include <conio.h>
 
+
+int MyIsDigit(char c)
+{
+	if (((int)c >= 48 && (int)c <= 57) || ((int)c >= 43 && (int)c <= 46))
+		return 1; else  return 0;
+}
+
+
 void gotoxy(int x, int y)
 {
 	COORD coord;
@@ -17,6 +25,16 @@ void PrintPas(char* s, int size)
 		printf("%c", s[i]);
 }
 
+int PasChek(char* s, int size)
+{
+	if (size < 8)return 0;
+	int num = 0;
+	int ch = 0;
+	for (int i = 1; i < size; i++)
+		if (MyIsDigit(s[i]) == 1) num++; else ch++;
+	if (num == 0 || ch == 0) return 0;
+	return 1;
+}
 
 int main()
 {
@@ -50,7 +68,12 @@ int main()
 		}
 		printf("\n");
 		line++;
+		flag = PasChek(password,size);
+		if (flag == 1) break;
+		printf("Bad password\n");
+		line++;
 		//PrintPas(password,size);
 	}
+	printf("Good password");
 
 }
