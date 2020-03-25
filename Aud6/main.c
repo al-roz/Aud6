@@ -23,7 +23,7 @@ int main()
 	int flag = 0;
 	int line = 0;
 	int pos = 0;
-	char prasswod[21];
+	char password[21];
 	while (flag != 1)
 	{
 		printf("Enter your prassword(max size 20)\n");
@@ -33,17 +33,24 @@ int main()
 		while (size < 20 && x != '\r')
 		{
 			x = _getche();
-			if (x != '\b') size++;			
-			else size--;
-			gotoxy(size - 1, line);
-			if (x != '\r') printf("*");
-			prasswod[size] = x;
+			size++;			
+			password[size] = x;
+			if (x == '\b') size -= 2;
+			gotoxy(size - 1 , line);
+			if (x != '\r' && x != '\b') printf("*");
+			if (x == '\b')
+			{
+				gotoxy(size, line);
+				printf(" ");
+				gotoxy(size, line);
+			}
+			
 			//printf("%d\n", size);			
-			if (size < 0) size = 0;
+			if (size < 0) size = 1;
 		}
 		printf("\n");
 		line++;
-		//PrintPas(prasswod,size);
+		//PrintPas(password,size);
 	}
 
 }
