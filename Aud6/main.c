@@ -1,8 +1,13 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <Windows.h>
-#include <conio.h>
+#ifndef UNICODE
+#define UNICODE
+#endif
+#pragma comment(lib, "netapi32.lib")
 
+#include <stdio.h>
+#include <assert.h>
+#include <windows.h>
+#include <lm.h>
+#include <LMaccess.h>
 
 int MyIsDigit(char c)
 {
@@ -38,6 +43,8 @@ int PasChek(char* s, int size)
 
 int main()
 {
+
+	/*
 	int flag = 0;
 	int line = 0;
 	int pos = 0;
@@ -75,5 +82,77 @@ int main()
 		//PrintPas(password,size);
 	}
 	printf("Good password");
+	*/
 
+
+	LPUSER_INFO_1 pBuf = NULL;
+	LPUSER_INFO_1 pTmpBuf;
+	DWORD dwLevel = 1;
+	DWORD dwPrefMaxLen = MAX_PREFERRED_LENGTH;
+	DWORD dwEntriesRead = 0;
+	DWORD dwTotalEntries = 0;
+	DWORD dwResumeHandle = 0;
+	DWORD i;
+	DWORD dwTotalCount = 0;
+	NET_API_STATUS nStatus;
+	LPTSTR pszServerName = NULL;
+
+	do
+	{
+		nStatus = NetUserEnum((LPCWSTR)pszServerName,
+			dwLevel,
+			FILTER_NORMAL_ACCOUNT,
+			(LPBYTE*)&pBuf,
+			dwPrefMaxLen,
+			&dwEntriesRead,
+			&dwTotalEntries,
+			&dwResumeHandle);
+		//
+		// Если вызов выполнен успешно
+		//
+		if ((nStatus == NERR_Success) || (nStatus == ERROR_MORE_DATA))
+		{
+			if ((pTmpBuf = pBuf) != NULL)
+			{
+				//
+				// Цикл по записям.
+				//
+				for (i = 0; (i < dwEntriesRead); i++)
+				{
+					assert(pTmpBuf != NULL);
+
+					if (pTmpBuf == NULL)
+					{
+						fprintf(stderr, "An access violation has occurred\n");
+						break;
+					}
+					//
+					// Вывод имени пользователя.
+					//
+					if (pTmpBuf->usri1_priv == USER_PRIV_USER) _wprintf_l(L"\t-- %s\n", "Russian", pTmpBuf->usri1_name);
+
+					pTmpBuf++;
+					dwTotalCount++;
+				}
+			}
+		}
+		//
+		// Otherwise, print the system error.
+		//
+		else
+			fprintf(stderr, "A system error has occurred: %d\n", nStatus);
+		//
+		// Free the allocated buffer.
+		//
+		if (pBuf != NULL)
+		{
+			NetApiBufferFree(pBuf);
+			pBuf = NULL;
+		}
+	} while (nStatus == ERROR_MORE_DATA);
+
+	if (pBuf != NULL)
+		NetApiBufferFree(pBuf);
+
+	//printf("sad");
 }
